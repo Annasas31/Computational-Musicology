@@ -27,7 +27,7 @@ Spinvis (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in
 The corpus that will be studied is the Corpus of different songs of Spinvis. Sampling different songs of every album made by Spinvis and sampling different songs in the coherent genres. This to try to distinguish what specific aspects of Spinvis can be heard in the different genres. I expect to that many aspects of the style of Spinvis can be found in many different genres, because it is hard to assign him to one specific genre. 
 
 
-### Analysis
+### Visualisation
 
 ```{r}
 ```
