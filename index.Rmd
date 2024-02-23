@@ -1,7 +1,7 @@
 ---
-title: "index.Rmd"
+title: "Spinvis project"
 author: "Anna Sas"
-date: "2024-02-21"
+date: "2024-02-23"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
@@ -28,9 +28,26 @@ The corpus that will be studied is the Corpus of different songs of Spinvis. Sam
 
 
 ### Visualisation
-
-```{r}
+```{r include=FALSE}
+spinvis <- get_artist_audio_features('spinvis')
+tracks_spinvis_project <- get_playlist_tracks("1005SKXxknjHvBI2qBoYRP")
+playlist_spinvis_project <- get_playlist_audio_features("", "1005SKXxknjHvBI2qBoYRP")
 ```
+
+```{r include=FALSE}
+
+spinvis_project <- ggplot(playlist_spinvis_project, aes(x = valence, y = energy )) + geom_jitter() + geom_smooth()
+
+```
+
+```{r echo=FALSE}
+
+plot(spinvis_project)
+
+```
+
+***
+have to look at how I want to visualize the data. Made 1 playlist called 'Spinvis project' containing only songs of Spinvis' different albums. I have to decide if I make another one with songs in "his" genre and without his songs and then to compare these playlist. 
 
 ### Conclusion
 
