@@ -129,7 +129,7 @@ komterug <-
 ```
 
 ```{r, echo=FALSE}
-#astronaut en komterug
+#astronaut en kom terug
 compmus_long_distance(
   astronaut |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
   komterug |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
