@@ -9,6 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+remotes::install_github('jaburgoyne/compmus')
 ```
 
 ```{r, include=FALSE}
@@ -18,6 +19,7 @@ library(spotifyr)
 library(flexdashboard)
 library(plotly)
 library(Cairo)
+library(compmus)
 
 ```
 
@@ -43,6 +45,111 @@ spinvis_project <- ggplot(playlist_spinvis_project, aes(x = valence, y = energy 
 ```{r echo=FALSE}
 
 plot(spinvis_project)
+
+```
+
+### Chromagram
+
+```{r include = FALSE}
+#making a chomagram deel 1 kom terug 
+komterug <-
+  get_tidy_audio_analysis("5EiOs7I8fX402shgQCWBSf") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+```
+
+```{r echo=FALSE}
+#making a chromagram
+komterug |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title= "Kom Terug") +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+
+```
+
+```{r, include=FALSE}
+#making a chomagram deel 1 Astronaut
+astronaut <-
+  get_tidy_audio_analysis("0zluTtcWus2xlgPlz4KQrV") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+```
+
+```{r, echo=FALSE}
+#making a chromagram deel 2 astronaut
+astronaut |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "astronaut") +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+
+```
+
+
+```{r, include=FALSE}
+## astronaut
+astronaut <-
+  get_tidy_audio_analysis("0zluTtcWus2xlgPlz4KQrV") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+  
+## kom terug
+komterug <-
+  get_tidy_audio_analysis("5EiOs7I8fX402shgQCWBSf") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+```
+
+```{r, echo=FALSE}
+#astronaut en komterug
+compmus_long_distance(
+  astronaut |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  komterug |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  feature = pitches,
+  method = "euclidean"
+) |>
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_equal() +
+  labs(x = "Astronaut", y = "Kom Terug", title= "album Omnibus (2007)") +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = NULL)
 
 ```
 
