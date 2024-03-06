@@ -7,6 +7,7 @@ output:
     storyboard: true
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 remotes::install_github('jaburgoyne/compmus')
@@ -28,27 +29,43 @@ library(compmus)
 Spinvis (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis is his own genre, but his music comes most close to the genres, experimental Lo-Fi, experimental pop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling and cutting of pieces of different sounds, varying from sound samples from computers and sounds made by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with the sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, is the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
 The corpus that will be studied is the Corpus of different songs of Spinvis. Sampling different songs of every album made by Spinvis and sampling different songs in the coherent genres. This to try to distinguish what specific aspects of Spinvis can be heard in the different genres. I expect to that many aspects of the style of Spinvis can be found in many different genres, because it is hard to assign him to one specific genre. 
 
+***
+
 
 ### Visualisation
 ```{r include=FALSE}
 spinvis <- get_artist_audio_features('spinvis')
 tracks_spinvis_project <- get_playlist_tracks("1005SKXxknjHvBI2qBoYRP")
 playlist_spinvis_project <- get_playlist_audio_features("", "1005SKXxknjHvBI2qBoYRP")
+
+track_spinvis_project_genre <- get_playlist_tracks("6STbsnrajWWZnnnWxqoFFv")
+playlist_spinvis_project_genre <- get_playlist_audio_features("","6STbsnrajWWZnnnWxqoFFv")
 ```
 
 ```{r include=FALSE}
-
-spinvis_project <- ggplot(playlist_spinvis_project, aes(x = valence, y = energy )) + geom_jitter() + geom_smooth()
-
-```
-
-```{r echo=FALSE}
-
-plot(spinvis_project)
+spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"),playlist_spinvis_project_genre |> mutate(category = "Genre"))
 
 ```
 
-### Chromagram
+```{r}
+spinvis_project1 <- data.frame(Feature = c("Danceability", "Energy", "Speechiness", "Acousticness", "Liveness", "Valence"),
+  Value = c(spinvis_project$danceability,spinvis_project$energy, spinvis_project$speechiness,spinvis_project$acousticness,spinvis_project$liveness,spinvis_project$valence), Category = c(spinvis_project$playlist_name)  
+) 
+
+spinvisplot_box <- ggplot(spinvis_project1, aes(x = interaction(Category, Feature), y = Value, fill = Feature)) +
+  geom_boxplot() +
+  labs(fill = "Feature") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+                       
+plot(spinvisplot_box)
+```
+                   
+***
+Both playlist of Spinvis as a playlist with overlapping genres are shown.  
+
+### Cepstrograms
 
 ```{r include = FALSE}
 #making a chomagram deel 1 kom terug 
@@ -61,7 +78,6 @@ komterug <-
 ```
 
 ```{r echo=FALSE}
-#making a chromagram
 komterug |>
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
   compmus_gather_chroma() |> 
@@ -74,64 +90,17 @@ komterug |>
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title= "Kom Terug") +
+  labs(x = "Time (s)", y = NULL, title = "Kom Terug", fill = "Magnitude") +
   theme_minimal() +
-  scale_fill_viridis_c() 
-
+  scale_fill_viridis_c()
 ```
 
-```{r, include=FALSE}
-#making a chomagram deel 1 Astronaut
-astronaut <-
-  get_tidy_audio_analysis("0zluTtcWus2xlgPlz4KQrV") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
+### 
 
-```
-
-```{r, echo=FALSE}
-#making a chromagram deel 2 astronaut
-astronaut |>
-  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
-  compmus_gather_chroma() |> 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "astronaut") +
-  theme_minimal() +
-  scale_fill_viridis_c() 
-
-```
-
-
-```{r, include=FALSE}
-## astronaut
-astronaut <-
-  get_tidy_audio_analysis("0zluTtcWus2xlgPlz4KQrV") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-  
-## kom terug
-komterug <-
-  get_tidy_audio_analysis("5EiOs7I8fX402shgQCWBSf") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-```
-
-```{r, echo=FALSE}
-#astronaut en kom terug
+```{r echo=FALSE}
+#making a chromagram
 compmus_long_distance(
-  astronaut |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  komterug |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
   komterug |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
   feature = pitches,
   method = "euclidean"
@@ -147,14 +116,13 @@ compmus_long_distance(
   ) +
   geom_tile() +
   coord_equal() +
-  labs(x = "Astronaut", y = "Kom Terug", title= "album Omnibus (2007)") +
+  labs(x = "Kom Terug", y = "Kom Terug") +
   theme_minimal() +
   scale_fill_viridis_c(guide = NULL)
-
+  
 ```
 
-***
-have to look at how I want to visualize the data. Made 1 playlist called 'Spinvis project' containing only songs of Spinvis' different albums. I have to decide if I make another one with songs in "his" genre and without his songs and then to compare these playlist. 
+
 
 ### Conclusion
 
