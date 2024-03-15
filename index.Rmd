@@ -60,7 +60,7 @@ Ronnie |>
 A Fourier-based tempogram of the song "Ronnie knipt zijn Haar (album: tot ziens, Justine Keller) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of 80 BPM. In some freer-form sections of the piece, tempo estimation is almost impossible.
 
 Ronnie knipt zijn Haar
-<iframe src="https://open.spotify.com/embed/track/53BEvoEYpcQ7418Ed4VMtg?utm_source=generator" width="100%" height="352" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+https://open.spotify.com/track/53BEvoEYpcQ7418Ed4VMtg?si=bb042e3bc0f24441
 
 
 ### Novelty function
@@ -120,9 +120,6 @@ Spinvis (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in
 The corpus that will be studied is the Corpus of different songs of Spinvis. Sampling different songs of every album made by Spinvis and sampling different songs in the coherent genres. This to try to distinguish what specific aspects of Spinvis can be heard in the different genres. I expect to that many aspects of the style of Spinvis can be found in many different genres, because it is hard to assign him to one specific genre. 
 
 ***
-<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1005SKXxknjHvBI2qBoYRP?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe> 
-
-<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6STbsnrajWWZnnnWxqoFFv?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
 
 ### How similar are the features in Spinvis songs compared to different genres
