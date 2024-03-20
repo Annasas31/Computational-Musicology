@@ -25,95 +25,165 @@ library(gridExtra)
 library(dplyr)
 library(futile.logger)
 library(VennDiagram)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 ```
 
+```{r}
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit |> 
+    collect_predictions() |> 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
 
+get_pr <- function(fit) {
+  fit |> 
+    conf_mat_resampled() |> 
+    group_by(Prediction) |> mutate(precision = Freq / sum(Freq)) |> 
+    group_by(Truth) |> mutate(recall = Freq / sum(Freq)) |> 
+    ungroup() |> filter(Prediction == Truth) |> 
+    select(class = Prediction, precision, recall)
+}  
 
-
-### Tempogram
-
-```{r, include=FALSE}
-Ronnie <- get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg")
-
-```
-
-```{r, echo=FALSE}
-Ronnie |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-
-Ronnie |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
 
 ```
 
-*** 
-A Fourier-based tempogram of the song "Ronnie knipt zijn Haar (album: tot ziens, Justine Keller) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of 80 BPM. In some freer-form sections of the piece, tempo estimation is almost impossible.
-
-Ronnie knipt zijn Haar
-https://open.spotify.com/track/53BEvoEYpcQ7418Ed4VMtg?si=bb042e3bc0f24441
-
-
-### Novelty function
-
-```{r echo=FALSE}
-Ronnie <-
-  get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg") |>
-  select(segments) |>
-  unnest(segments)
-
-Ronnie |>
-  mutate(loudness_max_time = start + loudness_max_time) |>
-  arrange(loudness_max_time) |>
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
-
-```
-
-```{r include=FALSE}
-Ronnie |>
+```{r}
+spinvisproject <-
+  get_playlist_audio_features("Spinvisproject", "1005SKXxknjHvBI2qBoYRP") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
   mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  arrange(start) |>
-  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
-  slice(-1) |> 
-  compmus_gather_chroma() |> 
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
 
 
+genre <-
+  get_playlist_audio_features("Spinvisprojectgenre", "6STbsnrajWWZnnnWxqoFFv") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
 
-Ronnie |>
-  arrange(start) |>
-  mutate(timbre = map2(timbre, lag(timbre), `-`)) |>
-  slice(-1) |>
-  compmus_gather_timbre() |>
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
 
+```
+
+```{r}
+spinvisproject1 <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration,
+    data = spinvisproject
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(spinvisproject |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
+
+
+genre1 <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration,
+    data = genre
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(genre |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
+
+
+spinvisproject_dist <- dist(spinvisproject1, method = "euclidean")
+genre_dist <- dist(genre1, method = "euclidean")
 ``` 
+
+```{r}
+spinvisproject_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+genre_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+```
+
+### Heatmap
+
+```{r}
+heatmaply(
+  spinvisproject1,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
+
+
+heatmaply(
+  genre1,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
+
+
+```
+
+
+
 ### Background
 
 Spinvis (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis is his own genre, but his music comes most close to the genres, experimental Lo-Fi, experimental pop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling and cutting of pieces of different sounds, varying from sound samples from computers and sounds made by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with the sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, is the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
@@ -142,15 +212,16 @@ spinvis_project1 <- data.frame(Feature = c("Danceability", "Energy", "Speechines
   Value = c(spinvis_project$danceability,spinvis_project$energy, spinvis_project$speechiness,spinvis_project$acousticness,spinvis_project$liveness,spinvis_project$valence), Category = c(spinvis_project$playlist_name)  
 ) 
 
+spinvis_project1 |>
+  ggplot(aes(x = Value, y = Feature, colour = Category)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  labs(
+    x = "Value",
+    y = "Feature",
+    colour = "Category"
+  )
 
-spinvisplot_bar <- ggplot(spinvis_project1, aes(x = Feature, y = Value, fill = Category)) +
-  geom_bar(stat = "identity", position = "dodge") +  # Use stat = "identity" to use the 'y' values directly
-  labs(fill = "Category") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = c("darkorange", "darkred"))  
-
-plot(spinvisplot_bar)
 
 #boxplot
 spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"),playlist_spinvis_project_genre |> mutate(category = "Genre"))
@@ -619,45 +690,98 @@ Typhoon has a very clear pattern in his song and is mostly in the keys F Major a
 Tame Impala has a less clear pattern, around 100 sec is a small decrease. Around 250 sec till 300 sec there is also a moment spotify is not sure how to analyse. In the song (starting from 3:50) there is a soundsequence that is probably hard to analyse for spotify, given the big yellow part. Furthermore it is hard to say in which specific key the song is played.  
 
 
-### histogram
-```{r include=FALSE}
-spinvis <-
-  get_playlist_audio_features(
-    "",
-    "1005SKXxknjHvBI2qBoYRP"
-  ) |>
-  slice(1:47) |>
-  add_audio_analysis()
 
-spinvisGenre <-
-  get_playlist_audio_features(
-    "",
-    "6STbsnrajWWZnnnWxqoFFv"
-  ) |>
-  slice(1:45) |>
-  add_audio_analysis()
-comparison <-
-  spinvis |>
-  mutate(genre = "spinvis") |>
-  bind_rows(spinvisGenre |> mutate(genre = "spinvisgenre"))
+
+### Tempogram
+
+```{r, include=FALSE}
+Ronnie <- get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg")
 
 ```
+
+```{r, echo=FALSE}
+Ronnie |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+Ronnie |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+```
+*** 
+A Fourier-based tempogram of the song "Ronnie knipt zijn Haar (album: tot ziens, Justine Keller) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of 80 BPM. In some freer-form sections of the piece, tempo estimation is almost impossible.
+
+Ronnie knipt zijn Haar
+https://open.spotify.com/track/53BEvoEYpcQ7418Ed4VMtg?si=bb042e3bc0f24441
+
+
+### Novelty function
 
 ```{r echo=FALSE}
-comparison %>%
-  ggplot(aes(x = tempo, fill = genre)) +
-  geom_histogram(binwidth = 10, position = "identity", alpha = 0.7) +
+Ronnie <-
+  get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg") |>
+  select(segments) |>
+  unnest(segments)
+
+Ronnie |>
+  mutate(loudness_max_time = start + loudness_max_time) |>
+  arrange(loudness_max_time) |>
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 30) +
   theme_minimal() +
-  labs(
-    x = "Mean Tempo (bpm)",
-    y = "Frequency",
-    fill = "Genre",
-    title = "Histogram of Mean Tempo by Genre"
-  )
+  labs(x = "Time (s)", y = "Novelty")
 
 ```
 
 
+
+
+
+
+
+
+```{r include=FALSE}
+Ronnie |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  arrange(start) |>
+  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
+  slice(-1) |> 
+  compmus_gather_chroma() |> 
+  group_by(start, duration) |> 
+  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
+  ggplot(aes(x = start + duration / 2, y = novelty)) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+
+
+Ronnie |>
+  arrange(start) |>
+  mutate(timbre = map2(timbre, lag(timbre), `-`)) |>
+  slice(-1) |>
+  compmus_gather_timbre() |>
+  group_by(start, duration) |> 
+  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
+  ggplot(aes(x = start + duration / 2, y = novelty)) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+``` 
 
 ### Conclusion
 
@@ -668,6 +792,139 @@ discussion/conclusion:
 
 ***
 
+### uitbroberen
 
+```{r}
+project <- get_playlist_audio_features("spotify", "1005SKXxknjHvBI2qBoYRP")
+genreproject <- get_playlist_audio_features("spotify", "6STbsnrajWWZnnnWxqoFFv")
+vergelijking <-
+  bind_rows(
+    project |> mutate(playlist = "Spinvis project") |> slice_head(n = 20),
+    genreproject |> mutate(playlist = "Spinvis project genre") |> slice_head(n = 20)
+  ) |> 
+  add_audio_analysis()
+
+
+```
+
+```{r}
+vergelijking_features <-
+  vergelijking |>  # For your portfolio, change this to the name of your corpus.
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
+
+
+```
+
+```{r}
+vergelijking_recipe <-
+  recipe(
+    playlist ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration,
+    data = vergelijking_features           # Use the same name as the previous block.
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())  
+
+vergelijking_cv <- vergelijking_features |> vfold_cv(5)
+```
+
+```{r}
+knn_model <-
+  nearest_neighbor(neighbors = 1) |>
+  set_mode("classification") |> 
+  set_engine("kknn")
+vergelijking_knn <- 
+  workflow() |> 
+  add_recipe(vergelijking_recipe) |> 
+  add_model(knn_model) |> 
+  fit_resamples(vergelijking_cv, control = control_resamples(save_pred = TRUE))
+
+vergelijking_knn |> get_conf_mat()
+
+vergelijking_knn |> get_conf_mat() |> autoplot(type = "mosaic")
+
+vergelijking_knn |> get_conf_mat() |> autoplot(type = "heatmap")
+```
+
+```{r}
+vergelijking_knn |> get_pr()
+```
+
+```{r}
+forest_model <-
+  rand_forest() |>
+  set_mode("classification") |> 
+  set_engine("ranger", importance = "impurity")
+vergelijking_forest <- 
+  workflow() |> 
+  add_recipe(vergelijking_recipe) |> 
+  add_model(forest_model) |> 
+  fit_resamples(
+    vergelijking_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+
+vergelijking_forest |> get_pr()
+```
+```{r}
+workflow() |> 
+  add_recipe(vergelijking_recipe) |> 
+  add_model(forest_model) |> 
+  fit(vergelijking_features) |> 
+  pluck("fit", "fit", "fit") |>
+  ranger::importance() |> 
+  enframe() |> 
+  mutate(name = fct_reorder(name, value)) |> 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance")
+
+
+
+```
+
+```{r}
+vergelijking_features |>
+  ggplot(aes(x = acousticness, y = c02, colour = playlist, size = energy)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  labs(
+    x = "Acousticness",
+    y = "Timbre Component 2",
+    size = "Energy",
+    colour = "Playlist"
+  )
+
+```
 
 ...
