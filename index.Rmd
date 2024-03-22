@@ -153,16 +153,6 @@ genre_dist <- dist(genre1, method = "euclidean")
 
 
 ```{r echo=FALSE}
-spinvisproject_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram()
-
-genre_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram()
-
 heatmaply(
   spinvisproject1,
   hclustfun = hclust,
@@ -175,8 +165,19 @@ heatmaply(
   genre1,
   hclustfun = hclust,
   hclust_method = "average",  # Change for single, average, or complete linkage.
-  dist_method = "euclidean"
-)
+  dist_method = "euclidean")
+  
+spinvisproject_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+genre_dist |> 
+  hclust(method = "average") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+
 
 
 ```
