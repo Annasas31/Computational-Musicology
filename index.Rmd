@@ -5,7 +5,7 @@ date: "2024-02-23"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
----
+--- 
 
 
 ```{r setup, include=FALSE}
@@ -30,6 +30,7 @@ library(ggdendro)
 library(heatmaply)
 library(ggplot2)
 library(ggimage)
+library(cowplot)
 ```
 
 ### Exploring Spinvis; The Unconventional Sound of Erik de Jong
@@ -49,9 +50,29 @@ spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"
 ```
 
 ```{r echo=FALSE}
-plotje <- ggplot(data= spinvis_project, aes(x= valence, y = danceability, text = (paste("Track:", track.name, "<br>", "Artist:", playlist_name)))) + geom_image(aes(image= playlist_img, asp = 1.7)) + theme_minimal() + ylab("Danceability") + xlab("Happiness")
+plot <- ggplot(data = spinvis_project, aes(x = valence, y = danceability, text = (
+    paste(
+      "Track:",
+      track.name,
+      "<br>",
+      "Artist:",
+      playlist_name,
+      "<br>",
+      "Release date:",
+      track.album.release_date
+    )
+  ), color = playlist_name)) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  ylab("Danceability") +
+  xlab("Positiveness") +
+  labs(title = "An overview of two playlists: Spinvis and Genre")
 
-print(plotje)
+
+ggplotly(plot, tooltip = c("text"))
+
+
+
 
 ```
 
@@ -60,8 +81,11 @@ print(plotje)
 The corpus that will be studied is a sample of different songs of Spinvis, which will be compared to a sample of different songs that are of coherent genres of Spinvis. The playlist [‘Spinvis project’](https://open.spotify.com/playlist/1005SKXxknjHvBI2qBoYRP?si=9c61620167704904) was made and consist of different songs of every album made by Spinvis. In addition, a second playlist [‘Spinvis project genre’](https://open.spotify.com/playlist/6STbsnrajWWZnnnWxqoFFv?si=f2ac6183e7a045db) was made, consisting of a random selected sample of songs by coherent genres. 
 Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
 
+***
+The Scatterplot shows a distribution of both the playlist of how happy and danceable the songs sound according to Spotify. What can be seen is that overall all songs are very scattered. However, all songs are almost evenly categorized in how danceable they are. The songs of the Genre playlist seems to be slightly more categorised as sounding happy. The song [Right on time](https://open.spotify.com/track/6JJ3UK1YfxO26iEiMWUHHj?si=b06f97f116d84ec4) of the genre playlist is the most danceable and sounds the most happy. The song [Onder Woorden](https://open.spotify.com/track/2irtgOuAkDnTiAfbMw4DO0?si=c2a9144aa45a4259) of the Spinvis playlist is the less danceable and sounds the least happy. 
 
-### Can Spinvis songs be categorized to different genres?
+
+### Can Spinvis songs be categorized into different genres?
 ```{r include=FALSE}
 spinvis <- get_artist_audio_features('spinvis')
 tracks_spinvis_project <- get_playlist_tracks("1005SKXxknjHvBI2qBoYRP")
@@ -76,68 +100,7 @@ spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"
 
 ```
 
-```{r}
-spinvis_project |>                    # Start with awards.
-  mutate(
-    mode = ifelse(mode == 0, "Minor", "Major")
-  ) |>
-  ggplot(                     # Set up the plot.
-    aes(
-      x = valence,
-      y = energy,
-      size = loudness,
-      colour = mode
-    )
-  ) +
-  geom_point() +              # Scatter plot.
-  geom_rug(linewidth = 0.1) + # Add 'fringes' to show data distribution.
-  geom_text(                  # Add text labels from above.
-    aes(
-      x = valence,
-      y = energy,
-      label = label
-    ),
-    data = 
-      tibble(
-        label = c("Spinvis", "Genre"),
-        category = c("Spinvis", "Genre"),
-        valence = c(0.104, 0.0339),
-        energy = c(0.992, 0.00166)
-      ),
-    colour = "black",         # Override colour (not mode here).
-    size = 3,                 # Override size (not loudness here).
-    hjust = "left",           # Align left side of label with the point.
-    vjust = "center",         # Align vertical center of label with the point.
-    nudge_x = 0.02            # Nudge the label slightly right.
-  ) +
-    facet_wrap(~ category) +  # Separate charts per playlist.
-  scale_x_continuous(         # Fine-tune the x axis.
-    limits = c(0, 1),
-    breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
-    minor_breaks = NULL       # Remove 'minor' grid-lines.
-  ) +
-  scale_y_continuous(         # Fine-tune the y axis in the same way.
-    limits = c(0, 1),
-    breaks = c(0, 0.50, 1),
-    minor_breaks = NULL
-  ) +
-  scale_colour_brewer(        # Use the Color Brewer to choose a palette.
-    type = "qual",            # Qualitative set.
-    palette = "Paired"        # Name of the palette is 'Paired'.
-  ) +
-  scale_size_continuous(      # Fine-tune the sizes of each point.
-    trans = "exp",            # Use an exp transformation to emphasise loud.
-    guide = "none"            # Remove the legend for size.
-  ) +
-  theme_light() +             # Use a simpler theme.
-  labs(                       # Make the titles nice.
-    x = "Postiveness of the song",
-    y = "Energeticness of the song",
-    colour = "Mode"
-  )
 
-
-```
 ```{r echo=FALSE}
 spinvis_project1 <- data.frame(Feature = c("Danceability", "Energy", "Speechiness", "Acousticness", "Liveness", "Valence"),
   Value = c(spinvis_project$danceability,spinvis_project$energy, spinvis_project$speechiness,spinvis_project$acousticness,spinvis_project$liveness,spinvis_project$valence), Category = c(spinvis_project$playlist_name)  
@@ -170,7 +133,7 @@ Both for spinvis as for the category genre, both have many outliers fluctuating 
 
 ### Can Spotify pitch that?
 
-```{r include = FALSE}
+```{r echo=FALSE}
 #making a chromagram 
 IkAdemDoorMijnOgen <- get_tidy_audio_analysis("2fHyR5RQfGvJMlfFW96faZ") |>
   select(segments) |>
@@ -181,10 +144,8 @@ Heimwee <- get_tidy_audio_analysis("6DvGnoj1obKohgqvrdy53r") |>
   select(segments) |>
   unnest(segments) |>
   select(start, duration, pitches)
-```
 
-```{r echo=FALSE}
-IkAdemDoorMijnOgen |>
+IADMO <- IkAdemDoorMijnOgen |>
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
   compmus_gather_chroma() |> 
   ggplot(
@@ -200,8 +161,7 @@ IkAdemDoorMijnOgen |>
   theme_minimal() +
   scale_fill_viridis_c()
 
-
-Heimwee |>
+Heimwee <- Heimwee |>
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
   compmus_gather_chroma() |> 
   ggplot(
@@ -217,14 +177,13 @@ Heimwee |>
   theme_minimal() +
   scale_fill_viridis_c()
 
+plot_grid(IADMO, Heimwee, ncol = 1)
+
 ```
 
 *** 
 ['Heimwee'](https://open.spotify.com/track/6DvGnoj1obKohgqvrdy53r?si=dc966cde0e504736)
 ['Ik Adem Door Mijn Ogen'](https://open.spotify.com/track/2fHyR5RQfGvJMlfFW96faZ?si=75b34beeb7884621)
-
-
-
 
 ### The B-side (Doris Day)
 
@@ -360,7 +319,7 @@ Applaus <-
 
 ```{r echo=FALSE}
 #part 2
-TZJK |>
+TZJK <- TZJK |>
   compmus_gather_timbre() |>
   ggplot(
     aes(
@@ -376,7 +335,7 @@ TZJK |>
   theme_classic()
 
 
-Applaus |>
+Applaus <- Applaus |>
   compmus_gather_timbre() |>
   ggplot(
     aes(
@@ -391,7 +350,10 @@ Applaus |>
   scale_fill_viridis_c() +                              
   theme_classic()
 
+plot_grid(TZJK, Applaus, ncol = 1)
+
 ```
+
 ***
 [Tot ziens, Justine Keller](https://open.spotify.com/track/0sUG0mC7N7yE5d1gbwrASv?si=d5e3cb3a3cff4e55)
 In the context of the song "Tot Ziens, Justine Keller" by Spinvis, the Cepstrogram provides insights into the spectral characteristics of the audio signal over time. By visualizing the cepstral coefficients, the Cepstrogram can reveal patterns and changes in pitch, timbre, and other spectral features throughout the song.
@@ -448,7 +410,7 @@ Avond <-
 
 ```{r echo=FALSE}
 
-LZHL |>
+LZHL <- LZHL |>
   compmus_self_similarity(timbre, "cosine") |> 
   ggplot(
     aes(
@@ -467,7 +429,7 @@ LZHL |>
 
 ## Avond
 
-Avond |>
+Avond <- Avond |>
   compmus_self_similarity(pitches, "cosine") |> 
   ggplot(
     aes(
@@ -485,7 +447,7 @@ Avond |>
   labs(x = "", y = "", title =  "Avond (Artist: Boudewijn de Groot)")
 
 
-
+plot_grid(LZHL, Avond, ncol = 1)
 ```
 
 ***
@@ -493,6 +455,7 @@ Avond |>
 [Avond](https://open.spotify.com/track/3n3F07lHLyRKwqg4q64eYA?si=5077a186a69a43a1)
 
 Timbre based Self-similarity Matrices: to see structure of the songs
+
 
 ### The Key to Spinvis
 
@@ -600,7 +563,7 @@ VoorIkVergeet <-
       )
   )
  
-VoorIkVergeet|> 
+VIV <- VoorIkVergeet|> 
   compmus_match_pitch_template(
     key_templates,         # Change to chord_templates if descired
     method = "euclidean",  # Try different distance metrics
@@ -629,7 +592,7 @@ HemelValt <-
       )
   )
 
-HemelValt |> 
+HM <- HemelValt |> 
   compmus_match_pitch_template(
     key_templates,         # Change to chord_templates if descired
     method = "euclidean",  # Try different distance metrics
@@ -656,7 +619,7 @@ LetItHappen <-
       )
   )
 
-LetItHappen |> 
+LIH <- LetItHappen |> 
   compmus_match_pitch_template(
     key_templates,         # Change to chord_templates if descired
     method = "euclidean",  # Try different distance metrics
@@ -670,7 +633,7 @@ LetItHappen |>
   theme_minimal() +
   labs(x = "Time (s)", y = "", title = "Let It Happen (Artist: Tame Impala)")
 
-
+grid.arrange(VIV, HM, LIH, ncol = 1)
 ```
 
 ***
@@ -697,7 +660,7 @@ Breathe <- get_tidy_audio_analysis("3MTF3yqjgGEUvQNZSWs0BU")
 ```
 
 ```{r, echo=FALSE}
-Astronaut |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+AS <- Astronaut |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
@@ -705,14 +668,17 @@ Astronaut |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   theme_classic()
 
 
-Breathe |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+BR <- Breathe |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)", title = "Breathe In, Breath Out (Artist: Melody's Echo Chamber)") +
   theme_classic()
 
+plot_grid(AS, BR, ncol = 2)
+
 ```
+
 *** 
 A Fourier-based tempogram of the song [Astronaut](https://open.spotify.com/track/0zluTtcWus2xlgPlz4KQrV?si=a2d1a6314e6c4f81) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of .... In some freer-form sections of the piece, tempo estimation is almost impossible.
 
@@ -788,7 +754,7 @@ genre <-
 
 ```
 
-```{r echo=FALSE}
+```{r include=FALSE}
 spinvisproject1 <-
   recipe(
     track.name ~
@@ -838,6 +804,9 @@ genre1 <-
 spinvisproject_dist <- dist(spinvisproject1, method = "euclidean")
 genre_dist <- dist(genre1, method = "euclidean")
 
+```
+
+```{r echo=FALSE}
 heatmaply(
   spinvisproject1,
   hclustfun = hclust,
@@ -849,6 +818,7 @@ heatmaply(
 ) 
 
 
+
 heatmaply(
   genre1,
   hclustfun = hclust,
@@ -856,7 +826,7 @@ heatmaply(
   dist_method = "euclidean",
   cexRow = 0.6,  
   cexCol = 1, 
-  main = "Spinvis songs genre")
+  main = "Spinvis songs genre") 
 
 
 ``` 
@@ -864,8 +834,10 @@ heatmaply(
 
 
 
-### The End of exploring Spinvis
+### exploring Spinvis; The End.
 Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
+
+This corpus, tried to give a graphs overview of how the artist Spinvis can be categorized by features distinguished with Spotify API. In addition, an overview was created of the same features in coherent genres to Spinvis. 
 
 weaknesses of the corpus:
 A weakness of the corpus is that for the corpus, many different songs are examined
@@ -876,4 +848,5 @@ discussion/conclusion:
 ***
 
 
-...
+
+
