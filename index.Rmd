@@ -1,5 +1,5 @@
 ---
-title: "Spinvis project"
+title: "Spinvis Project"
 author: "Anna Sas"
 date: "2024-02-23"
 output: 
@@ -28,173 +28,12 @@ library(VennDiagram)
 library(tidymodels)
 library(ggdendro)
 library(heatmaply)
+library(ggplot2)
+library(ggimage)
 ```
 
+### Exploring Spinvis; The Unconventional Sound of Erik de Jong
 
-
-### Heatmap and Dendogram
-```{r include=FALSE}
-get_conf_mat <- function(fit) {
-  outcome <- .get_tune_outcome_names(fit)
-  fit |> 
-    collect_predictions() |> 
-    conf_mat(truth = outcome, estimate = .pred_class)
-}  
-
-get_pr <- function(fit) {
-  fit |> 
-    conf_mat_resampled() |> 
-    group_by(Prediction) |> mutate(precision = Freq / sum(Freq)) |> 
-    group_by(Truth) |> mutate(recall = Freq / sum(Freq)) |> 
-    ungroup() |> filter(Prediction == Truth) |> 
-    select(class = Prediction, precision, recall)
-}  
-
-
-```
-
-```{r include=FALSE}
-spinvisproject <-
-  get_playlist_audio_features("Spinvisproject", "1005SKXxknjHvBI2qBoYRP") |>
-  add_audio_analysis() |>
-  mutate(
-    segments = map2(segments, key, compmus_c_transpose),
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      ),
-    timbre =
-      map(
-        segments,
-        compmus_summarise, timbre,
-        method = "mean"
-      )
-  ) |>
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  mutate_at(vars(pitches, timbre), map, bind_rows) |>
-  unnest(cols = c(pitches, timbre))
-
-
-genre <-
-  get_playlist_audio_features("Spinvisprojectgenre", "6STbsnrajWWZnnnWxqoFFv") |>
-  add_audio_analysis() |>
-  mutate(
-    segments = map2(segments, key, compmus_c_transpose),
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "manhattan"
-      ),
-    timbre =
-      map(
-        segments,
-        compmus_summarise, timbre,
-        method = "mean"
-      )
-  ) |>
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  mutate_at(vars(pitches, timbre), map, bind_rows) |>
-  unnest(cols = c(pitches, timbre))
-
-
-```
-
-```{r include=FALSE}
-spinvisproject1 <-
-  recipe(
-    track.name ~
-      danceability +
-      energy +
-      loudness +
-      speechiness +
-      acousticness +
-      instrumentalness +
-      liveness +
-      valence +
-      tempo +
-      duration,
-    data = spinvisproject
-  ) |>
-  step_center(all_predictors()) |>
-  step_scale(all_predictors()) |> 
-  # step_range(all_predictors()) |> 
-  prep(spinvisproject |> mutate(track.name = str_trunc(track.name, 20))) |>
-  juice() |>
-  column_to_rownames("track.name")
-
-
-genre1 <-
-  recipe(
-    track.name ~
-      danceability +
-      energy +
-      loudness +
-      speechiness +
-      acousticness +
-      instrumentalness +
-      liveness +
-      valence +
-      tempo +
-      duration,
-    data = genre
-  ) |>
-  step_center(all_predictors()) |>
-  step_scale(all_predictors()) |> 
-  # step_range(all_predictors()) |> 
-  prep(genre |> mutate(track.name = str_trunc(track.name, 20))) |>
-  juice() |>
-  column_to_rownames("track.name")
-
-
-spinvisproject_dist <- dist(spinvisproject1, method = "euclidean")
-genre_dist <- dist(genre1, method = "euclidean")
-``` 
-
-
-```{r echo=FALSE}
-heatmaply(
-  spinvisproject1,
-  hclustfun = hclust,
-  hclust_method = "average",  # Change for single, average, or complete linkage.
-  dist_method = "euclidean"
-)
-
-
-heatmaply(
-  genre1,
-  hclustfun = hclust,
-  hclust_method = "average",  # Change for single, average, or complete linkage.
-  dist_method = "euclidean")
-  
-spinvisproject_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram()
-
-genre_dist |> 
-  hclust(method = "average") |> # Try single, average, and complete.
-  dendro_data() |>
-  ggdendrogram()
-
-
-
-
-```
-***
-Two first heatmap shows only songs of Spinvis. The second heatmap shows songs of overlapping genres. Overall there are not many big differences between the two heatmaps and the features presented. However the songs of spinvis are generally more higher oriented on each feature rather than low, compared to the overlapping genre songs. Which seems to be slightly more low oriented. 
-In the Spinvis songs there is the song 'Onder Woorden' which spotify gave a very low value of dancebility. In addition, the song 'Aap' assigned spotify as very speechiness.   
-Interesting to see in the heatmap of overlapping genres, is that most songs are valued around +/- 0 for speechiness. However the song 'Hell N Black' was valued really high for speechiness by spotify. 
-
-### Background
-
-Spinvis (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis is his own genre, but his music comes most close to the genres, experimental Lo-Fi, experimental pop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling and cutting of pieces of different sounds, varying from sound samples from computers and sounds made by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with the sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, is the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
-The corpus that will be studied is the Corpus of different songs of Spinvis. Sampling different songs of every album made by Spinvis and sampling different songs in the coherent genres. This to try to distinguish what specific aspects of Spinvis can be heard in the different genres. I expect to that many aspects of the style of Spinvis can be found in many different genres, because it is hard to assign him to one specific genre. 
-
-***
-
-
-### How similar are the features in Spinvis songs compared to different genres
 ```{r include=FALSE}
 spinvis <- get_artist_audio_features('spinvis')
 tracks_spinvis_project <- get_playlist_tracks("1005SKXxknjHvBI2qBoYRP")
@@ -209,6 +48,96 @@ spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"
 
 ```
 
+```{r echo=FALSE}
+plotje <- ggplot(data= spinvis_project, aes(x= valence, y = danceability, text = (paste("Track:", track.name, "<br>", "Artist:", playlist_name)))) + geom_image(aes(image= playlist_img, asp = 1.7)) + theme_minimal() + ylab("Danceability") + xlab("Happiness")
+
+print(plotje)
+
+```
+
+*** 
+[Spinvis](https://open.spotify.com/artist/1Vxc40v4VtLpSWTF2bn8Y4?si=ezc-nCvBRp26msfb9To1-A) (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis is his own genre, but his music comes most close to the genres; experimental Lo-Fi, experimental pop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling of different sounds, which vary from sound samples of computers and even sounds composed by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with these sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, can be characterised as the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
+The corpus that will be studied is a sample of different songs of Spinvis, which will be compared to a sample of different songs that are of coherent genres of Spinvis. The playlist [‘Spinvis project’](https://open.spotify.com/playlist/1005SKXxknjHvBI2qBoYRP?si=9c61620167704904) was made and consist of different songs of every album made by Spinvis. In addition, a second playlist [‘Spinvis project genre’](https://open.spotify.com/playlist/6STbsnrajWWZnnnWxqoFFv?si=f2ac6183e7a045db) was made, consisting of a random selected sample of songs by coherent genres. 
+Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
+
+
+### Can Spinvis songs be categorized to different genres?
+```{r include=FALSE}
+spinvis <- get_artist_audio_features('spinvis')
+tracks_spinvis_project <- get_playlist_tracks("1005SKXxknjHvBI2qBoYRP")
+playlist_spinvis_project <- get_playlist_audio_features("", "1005SKXxknjHvBI2qBoYRP")
+
+track_spinvis_project_genre <- get_playlist_tracks("6STbsnrajWWZnnnWxqoFFv")
+playlist_spinvis_project_genre <- get_playlist_audio_features("","6STbsnrajWWZnnnWxqoFFv")
+```
+
+```{r include=FALSE}
+spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"),playlist_spinvis_project_genre |> mutate(category = "Genre"))
+
+```
+
+```{r}
+spinvis_project |>                    # Start with awards.
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) |>
+  ggplot(                     # Set up the plot.
+    aes(
+      x = valence,
+      y = energy,
+      size = loudness,
+      colour = mode
+    )
+  ) +
+  geom_point() +              # Scatter plot.
+  geom_rug(linewidth = 0.1) + # Add 'fringes' to show data distribution.
+  geom_text(                  # Add text labels from above.
+    aes(
+      x = valence,
+      y = energy,
+      label = label
+    ),
+    data = 
+      tibble(
+        label = c("Spinvis", "Genre"),
+        category = c("Spinvis", "Genre"),
+        valence = c(0.104, 0.0339),
+        energy = c(0.992, 0.00166)
+      ),
+    colour = "black",         # Override colour (not mode here).
+    size = 3,                 # Override size (not loudness here).
+    hjust = "left",           # Align left side of label with the point.
+    vjust = "center",         # Align vertical center of label with the point.
+    nudge_x = 0.02            # Nudge the label slightly right.
+  ) +
+    facet_wrap(~ category) +  # Separate charts per playlist.
+  scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),
+    minor_breaks = NULL
+  ) +
+  scale_colour_brewer(        # Use the Color Brewer to choose a palette.
+    type = "qual",            # Qualitative set.
+    palette = "Paired"        # Name of the palette is 'Paired'.
+  ) +
+  scale_size_continuous(      # Fine-tune the sizes of each point.
+    trans = "exp",            # Use an exp transformation to emphasise loud.
+    guide = "none"            # Remove the legend for size.
+  ) +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Postiveness of the song",
+    y = "Energeticness of the song",
+    colour = "Mode"
+  )
+
+
+```
 ```{r echo=FALSE}
 spinvis_project1 <- data.frame(Feature = c("Danceability", "Energy", "Speechiness", "Acousticness", "Liveness", "Valence"),
   Value = c(spinvis_project$danceability,spinvis_project$energy, spinvis_project$speechiness,spinvis_project$acousticness,spinvis_project$liveness,spinvis_project$valence), Category = c(spinvis_project$playlist_name)  
@@ -239,41 +168,22 @@ The first plot shows a bargraph in which little differences can be found. The bi
 In addition a second graph was plotted. Given that the playlist of only spinvis songs is compared to a playlist of several songs that all are from different genres overlapping with spinvis. Meaning that it is interesting to look at also the means and how these fluctuate and show very different results. 
 Both for spinvis as for the category genre, both have many outliers fluctuating eatheir down or up. For valence you can see that both the maximum as the minimum in both categories is the same but the mean is much different. 
 
-### Cepstrograms
+### Can Spotify pitch that?
 
 ```{r include = FALSE}
-#making a chomagram 'Picasso'
-Picasso <-
-  get_tidy_audio_analysis("7uZmEzoizrwl8KVFCWBSv1") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
+#making a chromagram 
 IkAdemDoorMijnOgen <- get_tidy_audio_analysis("2fHyR5RQfGvJMlfFW96faZ") |>
   select(segments) |>
   unnest(segments) |>
   select(start, duration, pitches)
 
+Heimwee <- get_tidy_audio_analysis("6DvGnoj1obKohgqvrdy53r") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
 ```
 
 ```{r echo=FALSE}
-
-Picasso |>
-  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
-  compmus_gather_chroma() |> 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, title = "Picasso (7.6.9.6.)", fill = "Magnitude") +
-  theme_minimal() +
-  scale_fill_viridis_c()
-
 IkAdemDoorMijnOgen |>
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
   compmus_gather_chroma() |> 
@@ -286,34 +196,54 @@ IkAdemDoorMijnOgen |>
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, title = "Ik Adem Door Mijn Ogen (Goochelaars & Geesten)", fill = "Magnitude") +
+  labs(x = "Time (s)", y = NULL, title = "Ik Adem Door Mijn Ogen (Album: Goochelaars & Geesten)", fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+
+
+Heimwee |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "Heimwee (Eefje de Visser)", fill = "Magnitude") +
   theme_minimal() +
   scale_fill_viridis_c()
 
 ```
 
 *** 
-chromogram of the song Picasso (album: 7.6.9.6). 
+['Heimwee'](https://open.spotify.com/track/6DvGnoj1obKohgqvrdy53r?si=dc966cde0e504736)
+['Ik Adem Door Mijn Ogen'](https://open.spotify.com/track/2fHyR5RQfGvJMlfFW96faZ?si=75b34beeb7884621)
 
 
-### Dynamic Time Wrapping
+
+
+### The B-side (Doris Day)
 
 ```{r echo=FALSE}
-#Dynamic Time Wrapping of both songs Kom Terug but different albums
-KomTerug_2011 <- get_tidy_audio_analysis("4ovxUTMs3Mi7ntZS2tJojk") |>
+#Dynamic Time Wrapping of both songs Doris-Day but different albums
+DDdoemaar<- get_tidy_audio_analysis("2ePX2r2elB35PhEE0jCQUb") |>
   select(segments) |>
   unnest(segments) |>
   select(start, duration, pitches)
   
-KomTerug_2017 <-
-  get_tidy_audio_analysis("5EiOs7I8fX402shgQCWBSf") |>
+DDspinvis <-
+  get_tidy_audio_analysis("1yoS3M2rBgDVfWh807OTv5") |>
   select(segments) |>
   unnest(segments) |>
   select(start, duration, pitches)
 
 compmus_long_distance(
-  KomTerug_2011 |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  KomTerug_2017 |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  DDdoemaar |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  DDspinvis |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
   feature = pitches,
   method = "euclidean"
 ) |>
@@ -328,58 +258,24 @@ compmus_long_distance(
   ) +
   geom_tile() +
   coord_equal() +
-  labs(x = 2011, y = 2017, title = "'Kom Terug' different albums") +
+  labs(x = "Doe Maar", y = "Sef, Spinvis, Doe Maar", title = "Doris Day") +
   theme_minimal() +
   scale_fill_viridis_c(guide = NULL)
-
-### Tweede kamer (genre) en Paradijs (spinvis)
-#Dynamic Time Wrapping of both songs Kom Terug but different albums
-TweedeKamer <- get_tidy_audio_analysis("6o1Uv8FqaVBtqCXmjrCbSA") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-  
-Paradijs <-
-  get_tidy_audio_analysis("2mbXlUgTv5fdWwfxVUoqn5") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-compmus_long_distance(
-  Paradijs |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  TweedeKamer |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  feature = pitches,
-  method = "euclidean"
-) |>
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_equal() +
-  labs(x = "Paradijs", y = "Tweede Kamer", title = "How similar are Tweede Kamer & Paradijs") +
-  theme_minimal() +
-  scale_fill_viridis_c(guide = NULL)
-
 
 ```
 
 ***
-The song Kom Terug can be found on different albums of Spinvis. A version of 
-Both songs paradijs and tweede kamer 
+The song [Doris Day](https://open.spotify.com/track/2ePX2r2elB35PhEE0jCQUb?si=cc8393a919664694), is originally from the Dutch pop group ['Doe Maar'](https://open.spotify.com/artist/58hFVpwYRp8sQdtANcMpiE?si=zjBwknyXSHO1eV3dNX-vnw). Songs were characterized by a mixture of reggae, pop, ska and Dutch vocals and formed a unique style of nervous, puncky pop songs. The group formed the emergence of the genre "Nederpop", a genre Spinvis is also associated with. 
+In 2012 the collaboration album [Versies/Limmen Tapes](https://open.spotify.com/album/3EUzuPAvFuJxEcOJRAyLxB?si=hHRHGDmmTmWOi_9p5mODRw) was released, which contained some of the best known songs of Doe Maar with a twist. 
+[Doris Day - Rapversie](https://open.spotify.com/track/1yoS3M2rBgDVfWh807OTv5?si=be3f6ce902cc4215 is one of these songs, a collaboration between singer Sef, Spinvis and the group Doe Maar.
 
 
-### Cepstrogram
+### Can we capture the sound of Spinvis
 
 ```{r include=FALSE}
-#part 1
-Picasso <-
-  get_tidy_audio_analysis("7uZmEzoizrwl8KVFCWBSv1") |> # Change URI.
+#part Tot ziens justine keller part 1
+TZJK <-
+  get_tidy_audio_analysis("0sUG0mC7N7yE5d1gbwrASv") |> # Change URI.
   compmus_align(bars, segments) |>                     # Change `bars`
   select(bars) |>                                      #   in all three
   unnest(bars) |>                                      #   of these lines.
@@ -398,9 +294,51 @@ Picasso <-
       )
   )
 
-#Alles is
-Picasso <-
-  get_tidy_audio_analysis("7uZmEzoizrwl8KVFCWBSv1") |> # Change URI.
+#part 2
+TZJK <-
+  get_tidy_audio_analysis("0sUG0mC7N7yE5d1gbwrASv") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+#part Applaus part 1
+Applaus <-
+  get_tidy_audio_analysis("5cBMHHUhxg8dMNv93aGJcw") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+#part 2
+Applaus <-
+  get_tidy_audio_analysis("5cBMHHUhxg8dMNv93aGJcw") |> # Change URI.
   compmus_align(bars, segments) |>                     # Change `bars`
   select(bars) |>                                      #   in all three
   unnest(bars) |>                                      #   of these lines.
@@ -422,7 +360,7 @@ Picasso <-
 
 ```{r echo=FALSE}
 #part 2
-Picasso |>
+TZJK |>
   compmus_gather_timbre() |>
   ggplot(
     aes(
@@ -433,17 +371,84 @@ Picasso |>
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Picasso (7.6.9.6.)") +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Album: Tot Ziens, Justine Keller (tot ziens, Justine Keller)") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+
+Applaus |>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Applaus (Artis: Bob uit Zuid)") +
   scale_fill_viridis_c() +                              
   theme_classic()
 
 ```
 ***
+[Tot ziens, Justine Keller](https://open.spotify.com/track/0sUG0mC7N7yE5d1gbwrASv?si=d5e3cb3a3cff4e55)
+In the context of the song "Tot Ziens, Justine Keller" by Spinvis, the Cepstrogram provides insights into the spectral characteristics of the audio signal over time. By visualizing the cepstral coefficients, the Cepstrogram can reveal patterns and changes in pitch, timbre, and other spectral features throughout the song.
 
-### Self-Similarity Matrices
+Interpreting the Cepstrogram requires some understanding of signal processing and audio analysis techniques. Generally, areas of higher magnitude or intensity in the Cepstrogram may correspond to prominent features or changes in the audio signal, such as musical notes, vocal inflections, or instrumental passages.
+[Applaus](https://open.spotify.com/track/5cBMHHUhxg8dMNv93aGJcw?si=fe6dc952c98a497a)
+
+
+### Capturing Patterns; Spinvis and Genres
+
+```{r include=FALSE}
+LZHL <-
+  get_tidy_audio_analysis("3DAf0gSsUxDeqeajVkJuvi") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+
+Avond <-
+  get_tidy_audio_analysis("3n3F07lHLyRKwqg4q64eYA") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+```
 
 ```{r echo=FALSE}
-PicassoTimbre <- Picasso |>
+
+LZHL |>
   compmus_self_similarity(timbre, "cosine") |> 
   ggplot(
     aes(
@@ -458,11 +463,11 @@ PicassoTimbre <- Picasso |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title = "Timbre")
+  labs(x = "", y = "", title = "Lang Zal Hij Leven (Album: Be-Bop-A-Lula)")
 
-## picasso
+## Avond
 
-PicassoPitches <- Picasso |>
+Avond |>
   compmus_self_similarity(pitches, "cosine") |> 
   ggplot(
     aes(
@@ -477,16 +482,19 @@ PicassoPitches <- Picasso |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title =  "Pitches")
-plot(PicassoPitches)
-plot(PicassoTimbre)
+  labs(x = "", y = "", title =  "Avond (Artist: Boudewijn de Groot)")
+
+
 
 ```
 
 ***
-Picasso song
+[Lang Zal Hij leven](https://open.spotify.com/track/3DAf0gSsUxDeqeajVkJuvi?si=9b70b3660a674586)
+[Avond](https://open.spotify.com/track/3n3F07lHLyRKwqg4q64eYA?si=5077a186a69a43a1)
 
-### Chordograms
+Timbre based Self-similarity Matrices: to see structure of the songs
+
+### The Key to Spinvis
 
 ```{r include=FALSE}
 circshift <- function(v, n) {
@@ -604,7 +612,7 @@ VoorIkVergeet|>
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "", title = "Voor Ik Vergeet (Spinvis)")
+  labs(x = "Time (s)", y = "", title = "Voor Ik Vergeet (Album: Spinvis)")
 
 
 
@@ -633,7 +641,7 @@ HemelValt |>
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "", title = "Hemel Valt (Typhoon)")
+  labs(x = "Time (s)", y = "", title = "Hemel Valt (Artist: Typhoon)")
 
 LetItHappen <-
   get_tidy_audio_analysis("2X485T9Z5Ly0xyaghN73ed") |>
@@ -660,117 +668,207 @@ LetItHappen |>
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "", title = "Let It Happen (Tame Impala)")
+  labs(x = "Time (s)", y = "", title = "Let It Happen (Artist: Tame Impala)")
+
 
 ```
 
 ***
 The songs that are seen in the Chordograms are:
-Voor Ik Vergeet (Spinvis)
-https://open.spotify.com/track/5lQozZo5ESEJ1g2cWjetba?si=3fb29402ab104c44
+[Voor Ik Vergeet](https://open.spotify.com/track/5lQozZo5ESEJ1g2cWjetba?si=3fb29402ab104c44) (Spinvis)
 
-Hemel Valt (Typhoon)
-https://open.spotify.com/track/2d0amOy3Pd3Y88EwAtBlj2?si=25992426e015493a
 
-Let It Happen (Tame Impala)
-https://open.spotify.com/track/2X485T9Z5Ly0xyaghN73ed?si=77597afa17224287
+[Hemel Valt](https://open.spotify.com/track/2d0amOy3Pd3Y88EwAtBlj2?si=25992426e015493a) (Typhoon)
+
+[Let It Happen](https://open.spotify.com/track/2X485T9Z5Ly0xyaghN73ed?si=77597afa17224287) (Tame Impala)
+
 
 What can be seen is the song of
 Spinvis shows a less clear pattern, and spotify seems to think that the song have come to an end at 220 sec. Also spinvis sound is mostly in c# minor, Ab Major and Db Major.
 Typhoon has a very clear pattern in his song and is mostly in the keys F Major and F Minor
 Tame Impala has a less clear pattern, around 100 sec is a small decrease. Around 250 sec till 300 sec there is also a moment spotify is not sure how to analyse. In the song (starting from 3:50) there is a soundsequence that is probably hard to analyse for spotify, given the big yellow part. Furthermore it is hard to say in which specific key the song is played.  
 
-
-
-
-### Tempogram
+### Tempo Tales of the Astronaut who learned to Breathe
 
 ```{r, include=FALSE}
-Ronnie <- get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg")
+Astronaut <- get_tidy_audio_analysis("0zluTtcWus2xlgPlz4KQrV")
+Breathe <- get_tidy_audio_analysis("3MTF3yqjgGEUvQNZSWs0BU")
 
 ```
 
 ```{r, echo=FALSE}
-Ronnie |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+Astronaut |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  labs(x = "Time (s)", y = "Tempo (BPM)", title = "Astronaut (Album: Spinvis") +
   theme_classic()
 
-Ronnie |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+
+Breathe |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  labs(x = "Time (s)", y = "Tempo (BPM)", title = "Breathe In, Breath Out (Artist: Melody's Echo Chamber)") +
   theme_classic()
 
 ```
 *** 
-A Fourier-based tempogram of the song "Ronnie knipt zijn Haar (album: tot ziens, Justine Keller) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of 80 BPM. In some freer-form sections of the piece, tempo estimation is almost impossible.
+A Fourier-based tempogram of the song [Astronaut](https://open.spotify.com/track/0zluTtcWus2xlgPlz4KQrV?si=a2d1a6314e6c4f81) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of .... In some freer-form sections of the piece, tempo estimation is almost impossible.
 
-Ronnie knipt zijn Haar
-https://open.spotify.com/track/53BEvoEYpcQ7418Ed4VMtg?si=bb042e3bc0f24441
+To compare the the temporal features of the song, another Fourier-based tempogram was conducted of the song [Breathe In, Breathe Out](https://open.spotify.com/track/3MTF3yqjgGEUvQNZSWs0BU?si=d65608bb9dbb4a74). Which shows that Spotify made an estimated tempo of ....
 
 
-### Novelty function
 
-```{r echo=FALSE}
-Ronnie <-
-  get_tidy_audio_analysis("53BEvoEYpcQ7418Ed4VMtg") |>
-  select(segments) |>
-  unnest(segments)
+###  Can we cluster what we know?
+```{r include=FALSE}
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit |> 
+    collect_predictions() |> 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
 
-Ronnie |>
-  mutate(loudness_max_time = start + loudness_max_time) |>
-  arrange(loudness_max_time) |>
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+get_pr <- function(fit) {
+  fit |> 
+    conf_mat_resampled() |> 
+    group_by(Prediction) |> mutate(precision = Freq / sum(Freq)) |> 
+    group_by(Truth) |> mutate(recall = Freq / sum(Freq)) |> 
+    ungroup() |> filter(Prediction == Truth) |> 
+    select(class = Prediction, precision, recall)
+}  
+
 
 ```
 
+```{r include=FALSE}
+spinvisproject <-
+  get_playlist_audio_features("Spinvisproject", "1005SKXxknjHvBI2qBoYRP") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
+
+
+genre <-
+  get_playlist_audio_features("Spinvisprojectgenre", "6STbsnrajWWZnnnWxqoFFv") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
+
+
+```
 
 ```{r echo=FALSE}
-Ronnie |>
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  arrange(start) |>
-  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
-  slice(-1) |> 
-  compmus_gather_chroma() |> 
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+spinvisproject1 <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration,
+    data = spinvisproject
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(spinvisproject |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
 
 
+genre1 <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration,
+    data = genre
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(genre |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
 
-Ronnie |>
-  arrange(start) |>
-  mutate(timbre = map2(timbre, lag(timbre), `-`)) |>
-  slice(-1) |>
-  compmus_gather_timbre() |>
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+
+spinvisproject_dist <- dist(spinvisproject1, method = "euclidean")
+genre_dist <- dist(genre1, method = "euclidean")
+
+heatmaply(
+  spinvisproject1,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean",
+  cexRow = 0.6,  
+  cexCol = 1,
+  main = "Spinvis songs"
+) 
+
+
+heatmaply(
+  genre1,
+  hclustfun = hclust,
+  hclust_method = "average",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean",
+  cexRow = 0.6,  
+  cexCol = 1, 
+  main = "Spinvis songs genre")
+
 
 ``` 
 
-### Conclusion
+
+
+
+### The End of exploring Spinvis
+Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
 
 weaknesses of the corpus:
+A weakness of the corpus is that for the corpus, many different songs are examined
 strengths of the corpus:
 interesting results overview:
 discussion/conclusion:
