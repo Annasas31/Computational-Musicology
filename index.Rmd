@@ -1,7 +1,7 @@
 ---
 title: "Spinvis Project"
 author: "Anna Sas"
-date: "2024-02-23"
+date: "30-03-2024"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
@@ -71,18 +71,15 @@ plot <- ggplot(data = spinvis_project, aes(x = valence, y = danceability, text =
 
 ggplotly(plot, tooltip = c("text"))
 
-
-
-
 ```
 
 *** 
-[Spinvis](https://open.spotify.com/artist/1Vxc40v4VtLpSWTF2bn8Y4?si=ezc-nCvBRp26msfb9To1-A) (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis is his own genre, but his music comes most close to the genres; experimental Lo-Fi, experimental pop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling of different sounds, which vary from sound samples of computers and even sounds composed by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with these sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, can be characterised as the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
+[Spinvis](https://open.spotify.com/artist/1Vxc40v4VtLpSWTF2bn8Y4?si=ezc-nCvBRp26msfb9To1-A) (Erik de Jong) is a Dutch artist, who’s music is hard to categorize in a specific genre. Some even say that Spinvis forms his own genre, but his music comes most close to the genres; experimental Lo-Fi, experimental Nederpop, neo-psychedelia, alternative indie and even a bit of modern dance and electronics. The music is composed through sampling of different sounds, which vary from sound samples of computers and even sounds composed by differing attributes, such as pot lids, a whistle and a keyboard. The texts of the songs cohere with these sounds and are almost poetic and supported by the melancholic voice of Erik. The first album, “Spinvis (2002)”, can be characterised as the most alternative and makes mainly use of computer based sampling, attributes and sensational song texts. From his third album on, “Dagen van Gras, Dagen Van Stro (2005)”, he is accompanied by his band. 
 The corpus that will be studied is a sample of different songs of Spinvis, which will be compared to a sample of different songs that are of coherent genres of Spinvis. The playlist [‘Spinvis project’](https://open.spotify.com/playlist/1005SKXxknjHvBI2qBoYRP?si=9c61620167704904) was made and consist of different songs of every album made by Spinvis. In addition, a second playlist [‘Spinvis project genre’](https://open.spotify.com/playlist/6STbsnrajWWZnnnWxqoFFv?si=f2ac6183e7a045db) was made, consisting of a random selected sample of songs by coherent genres. 
 Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
 
 ***
-The Scatterplot shows a distribution of both the playlist of how happy and danceable the songs sound according to Spotify. What can be seen is that overall all songs are very scattered. However, all songs are almost evenly categorized in how danceable they are. The songs of the Genre playlist seems to be slightly more categorised as sounding happy. The song [Right on time](https://open.spotify.com/track/6JJ3UK1YfxO26iEiMWUHHj?si=b06f97f116d84ec4) of the genre playlist is the most danceable and sounds the most happy. The song [Onder Woorden](https://open.spotify.com/track/2irtgOuAkDnTiAfbMw4DO0?si=c2a9144aa45a4259) of the Spinvis playlist is the less danceable and sounds the least happy. 
+The Scatterplot shows a distribution of both the playlist of how happy and danceable the songs sound according to Spotify. What can be seen is that overall, all songs are very scattered and thus different. However, all songs are almost evenly categorized in how danceable they are. The songs of the Genre playlist seems to be slightly more categorised as sounding happy. The song [Right on time](https://open.spotify.com/track/6JJ3UK1YfxO26iEiMWUHHj?si=b06f97f116d84ec4) of the genre playlist is the most danceable and sounds the most happy. The song [Onder Woorden](https://open.spotify.com/track/2irtgOuAkDnTiAfbMw4DO0?si=c2a9144aa45a4259) of the Spinvis playlist is the less danceable and sounds the least happy. When listening to both songs, a clear difference can be heard and therefore it does make sense how both songs are categorised.
 
 
 ### Can Spinvis songs be categorized into different genres?
@@ -100,7 +97,6 @@ spinvis_project <- rbind(playlist_spinvis_project |> mutate(category = "Spinvis"
 
 ```
 
-
 ```{r echo=FALSE}
 spinvis_project1 <- data.frame(Feature = c("Danceability", "Energy", "Speechiness", "Acousticness", "Liveness", "Valence"),
   Value = c(spinvis_project$danceability,spinvis_project$energy, spinvis_project$speechiness,spinvis_project$acousticness,spinvis_project$liveness,spinvis_project$valence), Category = c(spinvis_project$playlist_name)  
@@ -115,7 +111,7 @@ spinvis_project <- data.frame(Feature = c("Danceability", "Energy", "Speechiness
 
 spinvisplot <- ggplot(spinvis_project, aes(x = Feature, y = Value, fill = Category)) +
   geom_boxplot() +
-  labs(fill = "Category") +
+  labs(fill = "Playlist", title = "Overview of categorising both playlists") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1,))
 
@@ -124,12 +120,11 @@ plot(spinvisplot)
 ```
 
 ***
-The two playlist that are compared in both graphs are a Spinvis playlist, only containing songs of Spinvis (Category: Spinvis project) and a playlist with songs that are in overlapping genres with spinvis (Category: Spinvis project genre). Both graphs show the measured features and belonging values.
-The first plot shows a bargraph in which little differences can be found. The biggest difference can be seen between the categories and features of 'Liveness' and 'Valence'. Meaning that the songs of Spinvis are less featuring liveness compared to overlapping genres, but are more featuring valence. 
+The boxplot 'Overview of categorising both playlists' was made to give insight of how Spotify categories both playlist in each feature. 
+The two playlist that are compared in both graphs are a Spinvis playlist, only containing songs of Spinvis (Category: Spinvis project) and a playlist with songs that are in overlapping genres with spinvis (Category: Spinvis project genre). 
+What can be seen is that both playlist contain songs that are very different from the other songs. This was also seen in the previous scatterplot. 
+Spotify categorises the playlist of 'Spinvis songs' overall as somewhat lower than the playlist 'Spinvis songs genre'. However, the songs of Spinvis are somewhat higher in energy and valence. The results of feature valence is interesting to look at, since in the previous scatterplot I would categorise Spinvis songs as sounding little less positive. However, this plots shows different, nevertheless the difference is not very big. What can be concluded from this plot, is that there are many songs differing in values per feature and therefore we have to look more into depth of different songs. 
 
-
-In addition a second graph was plotted. Given that the playlist of only spinvis songs is compared to a playlist of several songs that all are from different genres overlapping with spinvis. Meaning that it is interesting to look at also the means and how these fluctuate and show very different results. 
-Both for spinvis as for the category genre, both have many outliers fluctuating eatheir down or up. For valence you can see that both the maximum as the minimum in both categories is the same but the mean is much different. 
 
 ### Can Spotify pitch that?
 
@@ -173,288 +168,20 @@ Heimwee <- Heimwee |>
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, title = "Heimwee (Eefje de Visser)", fill = "Magnitude") +
+  labs(x = "Time (s)", y = NULL, title = "Heimwee (Artist: Eefje de Visser)", fill = "Magnitude") +
   theme_minimal() +
   scale_fill_viridis_c()
 
-plot_grid(IADMO, Heimwee, ncol = 1)
+plot_grid(IADMO, Heimwee, ncol = 1, align = 'v', labels = c("A", "B"), label_size = 15, label_fontface = "bold", label_x = -0.07, label_y = 0.9, rel_widths = c(5, 5), rel_heights = c(5, 5))
 
 ```
 
 *** 
-['Heimwee'](https://open.spotify.com/track/6DvGnoj1obKohgqvrdy53r?si=dc966cde0e504736)
-['Ik Adem Door Mijn Ogen'](https://open.spotify.com/track/2fHyR5RQfGvJMlfFW96faZ?si=75b34beeb7884621)
+Two chromagrams showing the pitch of the songs ['Ik Adem Door Mijn Ogen'](https://open.spotify.com/track/2fHyR5RQfGvJMlfFW96faZ?si=75b34beeb7884621) (Playlist Spinvis project genre) and ['Heimwee'](https://open.spotify.com/track/6DvGnoj1obKohgqvrdy53r?si=dc966cde0e504736) (Playlist Spinvis project).
 
-### The B-side (Doris Day)
+What can be seen in the chromagram for the song 'Ik Adem Door Mijn Ogen', is that the song starts (the first 3 seconds) with a sound of bubles in water. Which explains the not so clear pitch class in the beginning. In addition, spotify does find it hard to specify in which key the song is. This could be due to the background singing of 'aahh', Spinvis singing and the instrumental sound. The 'aah' is a returning sound, therefore this is probably categorised as pith class A. In addition, around 150 seconds you can see a clear key detection of A#/Bb, which can be heared in the song when the 'aah' goes up in tone. Spinvis singing is probably in the pitch class C, since he is almost constantly singing and is the main sound in the song. 
 
-```{r echo=FALSE}
-#Dynamic Time Wrapping of both songs Doris-Day but different albums
-DDdoemaar<- get_tidy_audio_analysis("2ePX2r2elB35PhEE0jCQUb") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-  
-DDspinvis <-
-  get_tidy_audio_analysis("1yoS3M2rBgDVfWh807OTv5") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-compmus_long_distance(
-  DDdoemaar |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  DDspinvis |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  feature = pitches,
-  method = "euclidean"
-) |>
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_equal() +
-  labs(x = "Doe Maar", y = "Sef, Spinvis, Doe Maar", title = "Doris Day") +
-  theme_minimal() +
-  scale_fill_viridis_c(guide = NULL)
-
-```
-
-***
-The song [Doris Day](https://open.spotify.com/track/2ePX2r2elB35PhEE0jCQUb?si=cc8393a919664694), is originally from the Dutch pop group ['Doe Maar'](https://open.spotify.com/artist/58hFVpwYRp8sQdtANcMpiE?si=zjBwknyXSHO1eV3dNX-vnw). Songs were characterized by a mixture of reggae, pop, ska and Dutch vocals and formed a unique style of nervous, puncky pop songs. The group formed the emergence of the genre "Nederpop", a genre Spinvis is also associated with. 
-In 2012 the collaboration album [Versies/Limmen Tapes](https://open.spotify.com/album/3EUzuPAvFuJxEcOJRAyLxB?si=hHRHGDmmTmWOi_9p5mODRw) was released, which contained some of the best known songs of Doe Maar with a twist. 
-[Doris Day - Rapversie](https://open.spotify.com/track/1yoS3M2rBgDVfWh807OTv5?si=be3f6ce902cc4215 is one of these songs, a collaboration between singer Sef, Spinvis and the group Doe Maar.
-
-
-### Can we capture the sound of Spinvis
-
-```{r include=FALSE}
-#part Tot ziens justine keller part 1
-TZJK <-
-  get_tidy_audio_analysis("0sUG0mC7N7yE5d1gbwrASv") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-
-#part 2
-TZJK <-
-  get_tidy_audio_analysis("0sUG0mC7N7yE5d1gbwrASv") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-
-#part Applaus part 1
-Applaus <-
-  get_tidy_audio_analysis("5cBMHHUhxg8dMNv93aGJcw") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-
-#part 2
-Applaus <-
-  get_tidy_audio_analysis("5cBMHHUhxg8dMNv93aGJcw") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-```
-
-```{r echo=FALSE}
-#part 2
-TZJK <- TZJK |>
-  compmus_gather_timbre() |>
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = basis,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Album: Tot Ziens, Justine Keller (tot ziens, Justine Keller)") +
-  scale_fill_viridis_c() +                              
-  theme_classic()
-
-
-Applaus <- Applaus |>
-  compmus_gather_timbre() |>
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = basis,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Applaus (Artis: Bob uit Zuid)") +
-  scale_fill_viridis_c() +                              
-  theme_classic()
-
-plot_grid(TZJK, Applaus, ncol = 1)
-
-```
-
-***
-[Tot ziens, Justine Keller](https://open.spotify.com/track/0sUG0mC7N7yE5d1gbwrASv?si=d5e3cb3a3cff4e55)
-In the context of the song "Tot Ziens, Justine Keller" by Spinvis, the Cepstrogram provides insights into the spectral characteristics of the audio signal over time. By visualizing the cepstral coefficients, the Cepstrogram can reveal patterns and changes in pitch, timbre, and other spectral features throughout the song.
-
-Interpreting the Cepstrogram requires some understanding of signal processing and audio analysis techniques. Generally, areas of higher magnitude or intensity in the Cepstrogram may correspond to prominent features or changes in the audio signal, such as musical notes, vocal inflections, or instrumental passages.
-[Applaus](https://open.spotify.com/track/5cBMHHUhxg8dMNv93aGJcw?si=fe6dc952c98a497a)
-
-
-### Capturing Patterns; Spinvis and Genres
-
-```{r include=FALSE}
-LZHL <-
-  get_tidy_audio_analysis("3DAf0gSsUxDeqeajVkJuvi") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-
-
-Avond <-
-  get_tidy_audio_analysis("3n3F07lHLyRKwqg4q64eYA") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) |>
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-
-```
-
-```{r echo=FALSE}
-
-LZHL <- LZHL |>
-  compmus_self_similarity(timbre, "cosine") |> 
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_classic() +
-  labs(x = "", y = "", title = "Lang Zal Hij Leven (Album: Be-Bop-A-Lula)")
-
-## Avond
-
-Avond <- Avond |>
-  compmus_self_similarity(pitches, "cosine") |> 
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_classic() +
-  labs(x = "", y = "", title =  "Avond (Artist: Boudewijn de Groot)")
-
-
-plot_grid(LZHL, Avond, ncol = 1)
-```
-
-***
-[Lang Zal Hij leven](https://open.spotify.com/track/3DAf0gSsUxDeqeajVkJuvi?si=9b70b3660a674586)
-[Avond](https://open.spotify.com/track/3n3F07lHLyRKwqg4q64eYA?si=5077a186a69a43a1)
-
-Timbre based Self-similarity Matrices: to see structure of the songs
+Similar to the chromagram for the song 'Heimwee', is that spotify finds it hard to detect a specific pitch class. The song starts immediatly with Eefje de Visser singing, accomponied by a guitar. Spotify maps these pitches probably to the classes C and A, and some to D. Around 50 seconds a drum is added and you can hear for a few seconds an 'aah'. The 'aah' is probably detected and classified as the class G. Half way through the song (130 seconds), Eefje sings somewhat higher, which is probably detected as the classes C#/Db and D (a pitch change). The song ends in silence (last 4 seconds), which can be seen of spotify not able to distinguish a particular pitch
 
 
 ### The Key to Spinvis
@@ -570,7 +297,7 @@ VIV <- VoorIkVergeet|>
     norm = "manhattan"     # Try different norms
   ) |>
   ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+    aes(x = start + duration / 2, width = duration, higth = 40, y = name, fill = d)
   ) +
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
@@ -599,7 +326,7 @@ HM <- HemelValt |>
     norm = "manhattan"     # Try different norms
   ) |>
   ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+    aes(x = start + duration / 2, width = duration, higth = 40, y = name, fill = d)
   ) +
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
@@ -626,30 +353,174 @@ LIH <- LetItHappen |>
     norm = "manhattan"     # Try different norms
   ) |>
   ggplot(
-    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+    aes(x = start + duration / 2, width = duration, higth = 40,
+        y = name, fill = d)
   ) +
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
   labs(x = "Time (s)", y = "", title = "Let It Happen (Artist: Tame Impala)")
 
-grid.arrange(VIV, HM, LIH, ncol = 1)
+
+print(VIV)
+print(HM)
+print(LIH)
 ```
 
 ***
 The songs that are seen in the Chordograms are:
 [Voor Ik Vergeet](https://open.spotify.com/track/5lQozZo5ESEJ1g2cWjetba?si=3fb29402ab104c44) (Spinvis)
 
-
 [Hemel Valt](https://open.spotify.com/track/2d0amOy3Pd3Y88EwAtBlj2?si=25992426e015493a) (Typhoon)
 
 [Let It Happen](https://open.spotify.com/track/2X485T9Z5Ly0xyaghN73ed?si=77597afa17224287) (Tame Impala)
 
+What can be seen in the song 'Voor Ik vergeet', is a less clear pattern, and spotify seems to think that the song have come to an end at 220 sec. Also spinvis sound is mostly in C# minor, Ab Major and Db Major.
+The song of Typhoon (Hemel Valt) has a very clear pattern in his song and is mostly in the keys F Major and F Minor.
+The song 'Let It Happen' of Tame Impala, has as well a not so clear pattern. Around 100 second Spotify does not understand how to categorise the track. As well around 250 seconds till 300 seconds spotify is not able to fully analyse the track. Furthermore it is hard to say in which specific key the song is played.  
 
-What can be seen is the song of
-Spinvis shows a less clear pattern, and spotify seems to think that the song have come to an end at 220 sec. Also spinvis sound is mostly in c# minor, Ab Major and Db Major.
-Typhoon has a very clear pattern in his song and is mostly in the keys F Major and F Minor
-Tame Impala has a less clear pattern, around 100 sec is a small decrease. Around 250 sec till 300 sec there is also a moment spotify is not sure how to analyse. In the song (starting from 3:50) there is a soundsequence that is probably hard to analyse for spotify, given the big yellow part. Furthermore it is hard to say in which specific key the song is played.  
+
+### The B-side (Doris Day)
+
+```{r echo=FALSE}
+#Dynamic Time Wrapping of both songs Doris-Day but different albums
+DDdoemaar<- get_tidy_audio_analysis("2ePX2r2elB35PhEE0jCQUb")|>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+  
+DDspinvis <-
+  get_tidy_audio_analysis("1yoS3M2rBgDVfWh807OTv5") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+compmus_long_distance(
+  DDdoemaar |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  DDspinvis |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  feature = pitches,
+  method = "euclidean"
+) |>
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_equal() +
+  labs(x = "Doe Maar", y = "Sef, Spinvis, Doe Maar", title = "Doris Day") +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = NULL)
+
+```
+
+***
+The song [Doris Day](https://open.spotify.com/track/2ePX2r2elB35PhEE0jCQUb?si=cc8393a919664694), is originally from the Dutch pop group ['Doe Maar'](https://open.spotify.com/artist/58hFVpwYRp8sQdtANcMpiE?si=zjBwknyXSHO1eV3dNX-vnw). The sound of the group is often characterized by a mixture of reggae, pop, ska, Dutch vocals and formed a unique style of nervous, puncky pop songs. The group formed the emergence of the genre "Nederpop", a genre Spinvis is also associated with. 
+In 2012 the collaboration album [Versies/Limmen Tapes](https://open.spotify.com/album/3EUzuPAvFuJxEcOJRAyLxB?si=hHRHGDmmTmWOi_9p5mODRw) was released, which contained some of the best known songs of Doe Maar with a twist and sang with other dutch artist. 
+[Doris Day - Rapversie](https://open.spotify.com/track/1yoS3M2rBgDVfWh807OTv5?si=be3f6ce902cc4215 is one of these songs, a collaboration between singer Sef, Spinvis and the group Doe Maar. 
+
+A Dynamic Time Warping was made for the two versions of the song, to see if there are similarities detected by Spotify between the two versions. There is not a dark blue diagnonal line visible in the plot, meaning that the tempo of the songs is not similar. There are not very clear high or low cost regions presented in the visualisation. Meaning that spotify cannot distinguish clear similarities or dissimilarities between the songs. This could be due to the fact that when you listen to both songs there are many sounds accompanying the singing, which makes it probably hard for Spotify to detect a clear pitch. Which could have resulted in the visualisation of the Dynamic Time Warping, which makes it hard to say something about the tempo of both songs. 
+
+
+### Capturing Patterns; Spinvis and Genres
+
+```{r include=FALSE}
+LZHL <-
+  get_tidy_audio_analysis("3DAf0gSsUxDeqeajVkJuvi") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+
+Avond <-
+  get_tidy_audio_analysis("3n3F07lHLyRKwqg4q64eYA") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+```
+
+```{r echo=FALSE}
+LZHL <- LZHL |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "", title = "Lang Zal Hij Leven (Album: Be-Bop-A-Lula)")
+
+
+## Avond
+
+Avond <- Avond |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "", title =  "Avond (Artist: Boudewijn de Groot)")
+
+
+plot_grid(LZHL, Avond, ncol = 2)
+```
+
+***
+Three timbre based Self-similarity Matrices can be seen to analyse the structure of the songs. The song [Lang Zal Hij Leven](https://open.spotify.com/track/3DAf0gSsUxDeqeajVkJuvi?si=9b70b3660a674586) shows a clear diagonal line, meaning that spotify detects many similarities. This is also supported by the (dark) blue color of the matrice. Around 100 seconds, you can see and hear a change in the song that is not totaly similar to the rest of the song. In that part spinvis is accomponied by background singers, singing 'Hé'. A clear change in color (bright yellow) is around, meaning that there are no similarities found, this can be explained since the song 'stops' (fades out) around 2:40, but actually stops at 3:04, probably finds spotify this hard to categorise.
+
+The song [Avond](https://open.spotify.com/track/3n3F07lHLyRKwqg4q64eYA?si=5077a186a69a43a1) of Boudewijn de Groot shows as well a clear dark diagonal line, meaning that the sections in the song match very well. The matrice shows some more (yellow) patterns visualized, probably due that the song consist of more verses which are not similar to other parts of the song. Especially if you compare it to the song 'Lang Zal Hij Leven', which has a very clear background band all the way through the song (which is a quite constant sound) and Spinvis singing (many repeating parts). A more clear change can be seen around 120 seconds, probably Spotify thinks the song is ending. However a guitar solo can be heared, accompied by a string orchestra, and thereafter slowly fading out (more the background sound, rather than the singing).
+
+Comparing both songs, the biggest difference can be seen in the structure of the songs. The song 'Avond' shows a more unbalanced structure, which is correct when you listen to both songs. 
+
 
 ### Tempo Tales of the Astronaut who learned to Breathe
 
@@ -675,15 +546,15 @@ BR <- Breathe |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   labs(x = "Time (s)", y = "Tempo (BPM)", title = "Breathe In, Breath Out (Artist: Melody's Echo Chamber)") +
   theme_classic()
 
-plot_grid(AS, BR, ncol = 2)
+plot_grid(AS, BR, ncol = 1)
 
 ```
 
 *** 
-A Fourier-based tempogram of the song [Astronaut](https://open.spotify.com/track/0zluTtcWus2xlgPlz4KQrV?si=a2d1a6314e6c4f81) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. An estimation made by Spotify is a tempo of .... In some freer-form sections of the piece, tempo estimation is almost impossible.
+A Fourier-based tempogram of the song [Astronaut](https://open.spotify.com/track/0zluTtcWus2xlgPlz4KQrV?si=a2d1a6314e6c4f81) is shown. An attempt to analyse the tempo of the song is made, by using Spotify's API. Overall, Spotify estimates that the tempo of the song is 132 BPM. Which is clearly shown in the tempogram by a bright yellow line. In some very small sections, Spotify shows some confusion to make predictions about the tempo.
+To compare the the temporal features of the song, another Fourier-based tempogram was conducted of the song [Breathe In, Breathe Out](https://open.spotify.com/track/3MTF3yqjgGEUvQNZSWs0BU?si=d65608bb9dbb4a74). Which shows that Spotify made an estimation of the tempo of 122 BPM. This is also shown in the visualisation. What is interesting, is that spotify gets confused to predict the tempo around the end of the song. Which can be seen by a more freer-formed section. This confusion can due to the fact hat the song ends in some abrupt stops by the background guitar (around 2:35).
 
-To compare the the temporal features of the song, another Fourier-based tempogram was conducted of the song [Breathe In, Breathe Out](https://open.spotify.com/track/3MTF3yqjgGEUvQNZSWs0BU?si=d65608bb9dbb4a74). Which shows that Spotify made an estimated tempo of ....
-
+Overall, both the predicitons of tempo made by spotify is quite correct for both the songs. The tempo of 'Astronaut' is somewhat higher than the tempo of 'Breathe In, Breathe Out'. 
 
 
 ###  Can we cluster what we know?
@@ -773,7 +644,7 @@ spinvisproject1 <-
   step_center(all_predictors()) |>
   step_scale(all_predictors()) |> 
   # step_range(all_predictors()) |> 
-  prep(spinvisproject |> mutate(track.name = str_trunc(track.name, 20))) |>
+  prep(spinvisproject |> mutate(track.name = str_trunc(track.name, 40))) |>
   juice() |>
   column_to_rownames("track.name")
 
@@ -796,7 +667,7 @@ genre1 <-
   step_center(all_predictors()) |>
   step_scale(all_predictors()) |> 
   # step_range(all_predictors()) |> 
-  prep(genre |> mutate(track.name = str_trunc(track.name, 20))) |>
+  prep(genre |> mutate(track.name = str_trunc(track.name, 40))) |>
   juice() |>
   column_to_rownames("track.name")
 
@@ -807,45 +678,51 @@ genre_dist <- dist(genre1, method = "euclidean")
 ```
 
 ```{r echo=FALSE}
-heatmaply(
+plot1 <- heatmaply(
   spinvisproject1,
   hclustfun = hclust,
   hclust_method = "average",  # Change for single, average, or complete linkage.
   dist_method = "euclidean",
-  cexRow = 0.6,  
-  cexCol = 1,
+  cexRow = 0.2,  
+  cexCol = 0.4,
   main = "Spinvis songs"
 ) 
 
 
 
-heatmaply(
+plot2 <- heatmaply(
   genre1,
   hclustfun = hclust,
   hclust_method = "average",  # Change for single, average, or complete linkage.
   dist_method = "euclidean",
-  cexRow = 0.6,  
-  cexCol = 1, 
-  main = "Spinvis songs genre") 
+  cexRow = 0.2,  
+  cexCol = 0.4, 
+  main = "Spinvis songs vs Genre") 
 
-
+subplot(plot1, plot2, nrows = 2, margin = 0.05)
 ``` 
-
-
-
-
-### exploring Spinvis; The End.
-Both the playlist will be analysed to try to distinguish what specific features of Spinvis can be heard and if these features can be found in the different genres playlist. I expect that many features of Spinvis can be found in many different coherent genre songs, since it is hard to assign Spinvis to one specific genre.
-
-This corpus, tried to give a graphs overview of how the artist Spinvis can be categorized by features distinguished with Spotify API. In addition, an overview was created of the same features in coherent genres to Spinvis. 
-
-weaknesses of the corpus:
-A weakness of the corpus is that for the corpus, many different songs are examined
-strengths of the corpus:
-interesting results overview:
-discussion/conclusion:
-
 ***
+Two heatmaps with clustering were made for both the playlists. 
+The heatmap of the spinvis, breaks the playlist into seven clusters. The first cluster (Onder Woorden, Nogensinde, Haar atuo) is clustered based on the features energy and loudness and the features acousticness and instrumentalness. The second cluster (Dagen van gras,... till Paradijs) is characterised by the feature Speechiness. The third cluster (Wespen op de appeltaart till Astronaut) is clustered based on the feature instrumentalness. The fourth cluster (Heel goed nieuws and Voor ik vergeet) is clustered based on the feature tempo. The fifth cluster (Tienduizend Zwaluwwen till Het laatste wonder) is clustered on the feature valence. The sixt cluster (Tot ziens, Justine Keller till Ronnie knipt zijn haar) is clusterd on the feature danceability. The last cluster (De talen van mijn.. and Trein Vuur Dagenraad) is clustered on the liveness. 
+The songs 'Lotus Europa' (feature: duration (11:02 minutes)) and 'Aap!' (feature: Speechiness (containing speech)) are both grouped in bigger clusters, probably given the difference in these features that are strong and therefore cannot be clustered with other songs. 
+Overall, the features do not show many differing results that stand out per feature, besides the two mentioned songs and the cluster that exist of two/three songs (first, fourth and seventh clsuter). 
+
+The second heatmap of the spinvis genre, breaks the playlist into three clusters. The first cluster (Hippocampus till Oncle Jazz) is clustered based on the features liveness and energy. The second cluster (Hoe het ging till I'm Never gonna..) is clusterd on the features valence and speechiness. The last cluster (Hemel valt till this fffire- Newe version) is clustered on the features loudness and speechiness. 
+
+The song 'Hell N Back' (feature: speechiness) is clustered in a bigger group, probably since the song shows the most outline in the feature. 
+ 
+### Exploring Spinvis; The End.
+
+This corpus, tried to give a graphs overview of how the artist Spinvis can be categorized by features distinguished with Spotify API. In addition, an overview was created of the same features in coherent genres to Spinvis could be specified. 
+
+Although, there can be found differences and similarities between the two playlist based on the features, it is doubtable if we can make any discrete conclusions about which features of coherent genres can be recognised in Spinvis songs. 
+This is mainly do to one of the weaknessess of the corpus. The first weakness of the corpus that should be mentioned is that both playlists are a random sample of songs. Especially the playlist Spinvis project genre can be doubted, since it is composed of several genres that Spinvis is associated with, however how genres are categorised is somewhat vague/broad in Spotify. Therefore the songs can be categorised as similar, but also very different. 
+The second (big) limitation of the corpus, is that most analyses are done on track-level, which mostly compared two tracks. Both the songs of Spinvis and the coherent genres are very different from each songs in the playlists. Therefore, no conclusions can be made about whether the founded results could be founded in a more general sence (genre or Spinvis songs). 
+Therefore, maybe it would have been a better choice to only analyse Spinvis songs, since most songs are very different from each other, but a clear Spinvis sound can always be heared. Therefore, for further analyses I would recommend to analyse this specific Spinvis sound and how the sound could be characterised.
+
+However, one could also argue, based on the different feature distribution, that the two playlist share some common grounds. Therefore, one could say that there are some similar feature levels found in both playlists. However, which feature levels correspond with a specific genre and which thus overlapp with Spinvis is not entirely clear. 
+
+To conclude, this corpus has shown some insight into the two playlist that were conducted for this corpus analysis. In addition, it also shows that using Spotify to analyse the playlists and its songs based on the features of API gives a quite right representation of the songs. Sometimes the visualisations are not totally correct, however most general overviews can be seen. Accompanied by listening to the songs, the analyses provide a more visualised view. Which could be helpfull for a better understanding of a certain track. 
 
 
 
