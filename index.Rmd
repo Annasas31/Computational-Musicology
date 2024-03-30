@@ -421,7 +421,7 @@ compmus_long_distance(
 ***
 The song [Doris Day](https://open.spotify.com/track/2ePX2r2elB35PhEE0jCQUb?si=cc8393a919664694), is originally from the Dutch pop group ['Doe Maar'](https://open.spotify.com/artist/58hFVpwYRp8sQdtANcMpiE?si=zjBwknyXSHO1eV3dNX-vnw). The sound of the group is often characterized by a mixture of reggae, pop, ska, Dutch vocals and formed a unique style of nervous, puncky pop songs. The group formed the emergence of the genre "Nederpop", a genre Spinvis is also associated with. 
 In 2012 the collaboration album [Versies/Limmen Tapes](https://open.spotify.com/album/3EUzuPAvFuJxEcOJRAyLxB?si=hHRHGDmmTmWOi_9p5mODRw) was released, which contained some of the best known songs of Doe Maar with a twist and sang with other dutch artist. 
-[Doris Day - Rapversie](https://open.spotify.com/track/1yoS3M2rBgDVfWh807OTv5?si=be3f6ce902cc4215 is one of these songs, a collaboration between singer Sef, Spinvis and the group Doe Maar. 
+[Doris Day - Rapversie](https://open.spotify.com/track/1yoS3M2rBgDVfWh807OTv5?si=be3f6ce902cc4215) is one of these songs, a collaboration between singer Sef, Spinvis and the group Doe Maar. 
 
 A Dynamic Time Warping was made for the two versions of the song, to see if there are similarities detected by Spotify between the two versions. There is not a dark blue diagnonal line visible in the plot, meaning that the tempo of the songs is not similar. There are not very clear high or low cost regions presented in the visualisation. Meaning that spotify cannot distinguish clear similarities or dissimilarities between the songs. This could be due to the fact that when you listen to both songs there are many sounds accompanying the singing, which makes it probably hard for Spotify to detect a clear pitch. Which could have resulted in the visualisation of the Dynamic Time Warping, which makes it hard to say something about the tempo of both songs. 
 
@@ -488,7 +488,7 @@ LZHL <- LZHL |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title = "Lang Zal Hij Leven (Album: Be-Bop-A-Lula)")
+  labs(x = "", y = "", title = "Lang Zal Hij Leven (Spinvis)")
 
 
 ## Avond
@@ -508,7 +508,7 @@ Avond <- Avond |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title =  "Avond (Artist: Boudewijn de Groot)")
+  labs(x = "", y = "", title =  "Avond (Boudewijn de Groot)")
 
 
 plot_grid(LZHL, Avond, ncol = 2)
@@ -547,7 +547,6 @@ BR <- Breathe |> tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
   theme_classic()
 
 plot_grid(AS, BR, ncol = 1)
-
 ```
 
 *** 
@@ -687,7 +686,6 @@ plot1 <- heatmaply(
   cexCol = 0.4,
   main = "Spinvis songs"
 ) 
-
 
 
 plot2 <- heatmaply(
